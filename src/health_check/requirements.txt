@@ -1,0 +1,2 @@
+# boto3/botocore ship with the Lambda runtime, so nothing is bundled here.
+# Kept as a manifest for pip-audit in CI.
