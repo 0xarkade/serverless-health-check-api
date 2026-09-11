@@ -1,0 +1,42 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# tfvars often hold secrets. Per-environment configs here do not, so allow them.
+*.tfvars
+*.tfvars.json
+!infra/environments/*.tfvars
+!*.tfvars.example
+
+# .terraform.lock.hcl is committed on purpose: it pins provider versions and hashes.
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+*.egg-info/
+
+# Build output
+build/
+dist/
+*.zip
+
+# Local
+.env
+.DS_Store
+.idea/
+.vscode/
+*.code-workspace
