@@ -37,3 +37,14 @@ module "lambda" {
   subnet_ids         = module.network.private_subnet_ids
   security_group_ids = [module.network.lambda_security_group_id]
 }
+
+module "api_gateway" {
+  source = "./modules/api_gateway"
+
+  name                 = "${var.environment}-health-check-api"
+  stage_name           = var.environment
+  lambda_invoke_arn    = module.lambda.invoke_arn
+  lambda_function_name = module.lambda.function_name
+  throttle_rate_limit  = var.api_throttle_rate_limit
+  throttle_burst_limit = var.api_throttle_burst_limit
+}
