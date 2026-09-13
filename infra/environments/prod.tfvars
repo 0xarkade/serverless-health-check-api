@@ -7,3 +7,5 @@ log_retention_days = 30
 
 api_throttle_rate_limit  = 100
 api_throttle_burst_limit = 200
+
+kms_deletion_window_days = 30

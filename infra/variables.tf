@@ -51,3 +51,8 @@ variable "api_throttle_burst_limit" {
   description = "Burst capacity allowed by the API stage."
   type        = number
 }
+
+variable "kms_deletion_window_days" {
+  description = "Days the KMS key stays recoverable after deletion is scheduled."
+  type        = number
+}
