@@ -12,3 +12,11 @@ module "dynamodb" {
   name        = "${var.environment}-requests-db"
   kms_key_arn = module.kms.key_arn
 }
+
+module "network" {
+  source = "./modules/network"
+
+  name_prefix = var.environment
+  cidr_block  = var.vpc_cidr
+  region      = var.aws_region
+}
