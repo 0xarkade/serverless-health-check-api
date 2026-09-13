@@ -1,0 +1,13 @@
+misconfigurations:
+  - id: AWS-0132
+    paths:
+      - "bootstrap/state.tf"
+    statement: >-
+      The Terraform state bucket uses SSE-S3 rather than a customer managed key.
+      A CMK here would add a key that itself needs a policy and a recovery plan,
+      would require the deploy roles to hold kms permissions to read state, and
+      would mean that losing the key loses every state file permanently. The
+      bucket is private, versioned, blocked from public access and refuses non
+      TLS requests, which is proportionate for its contents. The customer
+      managed key requirement in the brief applies to the DynamoDB table, which
+      does use one.
