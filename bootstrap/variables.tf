@@ -9,3 +9,21 @@ variable "project" {
   type        = string
   default     = "health-check"
 }
+
+variable "github_owner" {
+  description = "GitHub account that owns the repository allowed to deploy."
+  type        = string
+  default     = "0xarkade"
+}
+
+variable "github_repo" {
+  description = "Repository allowed to assume the deploy roles."
+  type        = string
+  default     = "serverless-health-check-api"
+}
+
+variable "environments" {
+  description = "Environments that get their own deploy role."
+  type        = list(string)
+  default     = ["staging", "prod"]
+}
