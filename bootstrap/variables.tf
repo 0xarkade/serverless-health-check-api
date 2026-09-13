@@ -27,3 +27,15 @@ variable "environments" {
   type        = list(string)
   default     = ["staging", "prod"]
 }
+
+variable "github_owner_id" {
+  description = "Numeric id of the GitHub account, used in the immutable OIDC subject."
+  type        = string
+  default     = "39199126"
+}
+
+variable "github_repo_id" {
+  description = "Numeric id of the repository, used in the immutable OIDC subject."
+  type        = string
+  default     = "1365669347"
+}
