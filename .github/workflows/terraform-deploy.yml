@@ -27,14 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      # Temporary: shows the claims AWS matches the trust policy against.
-      # Prints only the claims, never the token itself.
-      - name: show oidc claims
-        run: |
-          token=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
-          payload=$(echo "$token" | cut -d. -f2)
-          echo "${payload}===" | tr '_-' '/+' | base64 -di 2>/dev/null | jq '{sub, aud, repository, environment, job_workflow_ref}'
-
       # No access keys. GitHub mints a short lived token describing this job,
       # and AWS exchanges it for credentials only if the trust policy matches
       # this repository and this environment.
