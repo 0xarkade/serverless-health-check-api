@@ -1,0 +1,64 @@
+name: terraform deploy
+
+# Called by deploy.yml once per environment. Keeping the steps in one place
+# means staging and prod cannot drift apart.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment to deploy, matching the tfvars and backend config.
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+
+    # Gates the job on the GitHub Environment of the same name. prod has
+    # required reviewers, so this job waits for an approval before it starts.
+    environment: ${{ inputs.environment }}
+
+    permissions:
+      # Lets the job request the OIDC token it trades for AWS credentials.
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # No access keys. GitHub mints a short lived token describing this job,
+      # and AWS exchanges it for credentials only if the trust policy matches
+      # this repository and this environment.
+      - uses: aws-actions/configure-aws-credentials@v6.2.4
+        with:
+          role-to-assume: arn:aws:iam::701364614525:role/${{ inputs.environment }}-deploy-role
+          aws-region: eu-central-1
+
+      - uses: hashicorp/setup-terraform@v4.0.1
+        with:
+          terraform_version: 1.16.2
+          terraform_wrapper: false
+
+      - name: init
+        run: >-
+          terraform -chdir=infra init -input=false
+          -backend-config=environments/${{ inputs.environment }}.backend.hcl
+
+      # Written to a file so apply runs exactly what was planned, rather than
+      # re-resolving and possibly applying something else.
+      - name: plan
+        run: >-
+          terraform -chdir=infra plan -input=false
+          -var-file=environments/${{ inputs.environment }}.tfvars
+          -out=tfplan
+
+      - name: apply
+        run: terraform -chdir=infra apply -input=false tfplan
+
+      - name: smoke test
+        run: |
+          url=$(terraform -chdir=infra output -raw health_url)
+          key=$(terraform -chdir=infra output -raw api_key_value)
+          echo "::add-mask::$key"
+          ./scripts/smoke_test.sh "$url" "$key"

@@ -1,0 +1,52 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Two applies against the same state at once would fight over the lock, so
+# deploys queue rather than run in parallel.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  # The security gate lives in this workflow rather than only in ci.yml, so no
+  # path exists that reaches terraform apply without passing a scan first.
+  scan:
+    name: security gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: scan terraform for misconfiguration
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          trivyignores: .trivyignore.yaml
+
+  staging:
+    needs: scan
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      environment: staging
+
+  # Only runs if staging deployed and its smoke tests passed, and then waits
+  # for a human to approve the prod environment.
+  prod:
+    needs: staging
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      environment: prod
